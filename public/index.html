@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>~todo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Page Title</title>
+  <link rel="stylesheet" href="style.css"> 
+  <link rel="stylesheet" href="datepicker.min.css"> 
+</head>
+
+<body>
+		
+	<div id="taskContainer" class='scrollable-container'>
+	  <table id="taskTable">
+		<thead>
+		  <tr>
+			<th>Task Name</th>
+			<th style="display: none;">Creation Time</th>
+			<th style="display: none;">Category</th>
+			<th style="display: none;">Priority</th>
+			<th style="display: none;">Due Time</th>
+			<th style="display: none;">Completion Time</th>
+			<th style="display: none;">Days To Resurrect</th>
+		  </tr>
+		</thead>
+		<tbody></tbody>
+	  </table>
+	</div>
+
+	<div class="center-div">
+	  sort by:
+	  <button onclick="sortByColumn(1)">Age</button>
+	  <button onclick="sortByColumn(2)">Cat</button>
+	  <button onclick="sortByColumn(4)">Due</button>
+	</div>
+
+	<div class="center-div">
+	  name:
+	  <input type="text" id="nameBox"></input>
+	</div>
+
+	<div class="center-div">
+	  <select id="catSelect"></select>
+	  <select id="prioritySelect">
+		  <option value=2>🔴</option>
+		  <option value=1>🟡</option>
+		  <option value=0>🟢</option>
+		  <option value=-1>🔵</option>
+	   </select>
+	</div>
+
+	<div class="center-div">
+	  due date:
+	  <input type="text" id="dueBox" readOnly></textarea>
+	  <button id="clearDue">X</button>
+	</div>
+
+	<div class="center-div">
+	  notes:
+	  <textarea id="notesBox"></textarea>
+	</div>
+
+	<div class="center-div">
+	  <button id="saveBtn">Save</button>
+	  <button id="newBtn">New</button>
+	  <button >Done</button>
+	</div>
+	
+	<div class="center-div">
+		<input type="number" id="resurrectBox" min="0" />
+	</div>
+
+	<div class="center-div">
+	  <button id="testBtn">testBtn</button>
+	</div>
+	
+	<div class="center-div">
+	  testField:
+	  <textarea id="testField"></textarea>
+	</div>
+
+	<script src="tablesort.js"></script>
+	<script src="datepicker.min.js"></script>
+	<script src="main.js"></script>
+
+</body>
+
