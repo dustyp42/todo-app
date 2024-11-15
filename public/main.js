@@ -4,6 +4,7 @@ let selectedTaskId = null;
 let sortType = 'dueSoonest';
 let pinHighPriority = true;
 let saveTimeout;
+let categoryOrder;
 const delayTime = 800;
 
 // Main function to fetch JSON and populate the UI
@@ -13,6 +14,15 @@ function populateFromServer() {
     .then(data => {
       categoryMappings = data.categories; // Emoji to category mappings
       taskData = data.tasks; // Now data.tasks is already an object with taskCreationTime as keys
+
+      // Create a map of category order based on original JSON order (need this to make sure category sort order is consistent)
+      categoryOrder = Object.keys(categoryMappings).reduce((order, category, index) => {
+        order[category] = index;
+        return order;
+      }, {});
+
+      // Sort by creation date
+      sortTasks(taskData, 'newestFirst');
 
       // Populate the dropdown category selector
       const dropdown = document.getElementById('catSelect');
@@ -31,23 +41,9 @@ function populateFromServer() {
     .catch(error => console.error('Error loading tasks:', error));
 }
 
-// Populate the task table based on local object "taskData"
-function refreshTaskTable() {
-  const tableBody = document.querySelector('#taskTable tbody');
-  tableBody.innerHTML = ''; // Clear existing rows
-
-  // Create a map of category order based on original JSON order (need this to make sure category sort order is consistent)
-  const categoryOrder = Object.keys(categoryMappings).reduce((order, category, index) => {
-    order[category] = index;
-    return order;
-  }, {});
-
-  // Extract tasks and sort them based on the current sortType and pinHighPriority
-  let tasks = Object.values(taskData).filter(task => task.taskCompletionTime === 0); // Exclude completed tasks
-
+function sortTasks(tasks, sortType) {
   // Apply sorting
   tasks.sort((a, b) => {
-
     // Sort based on sortType
     switch (sortType) {
       case 'oldestFirst':
@@ -58,8 +54,7 @@ function refreshTaskTable() {
 
       case 'dueSoonest':
         // Place tasks with no due dates (null) at the end
-        return (a.taskDueTime === null ? 1 : a.taskDueTime) -
-          (b.taskDueTime === null ? 1 : b.taskDueTime);
+        return (a.taskDueTime === null ? (b.taskDueTime == null ? 0 : 1) : (b.taskDueTime == null ? -1 : a.taskDueTime - b.taskDueTime));
 
       case 'byCategory':
         const categoryIndexA = categoryOrder[a.taskCategory] || Infinity;
@@ -70,14 +65,25 @@ function refreshTaskTable() {
         return 0;
     }
   });
+}
+
+// Populate the task table based on local object "taskData"
+function refreshTaskTable() {
+  const tableBody = document.querySelector('#taskTable tbody');
+  tableBody.innerHTML = ''; // Clear existing rows
+
+  // Extract pending tasks
+  let tasks = Object.values(taskData).filter(task => task.taskCompletionTime === 0); // Exclude completed tasks
+
+  // Sort them
+  sortTasks(tasks, sortType);
 
   // Apply second sort for priority if applicable
-  tasks.sort((a, b) => {
-    // Pin high-priority tasks to the top if pinHighPriority is true
-    if (pinHighPriority && a.taskPriority !== b.taskPriority) {
-      return b.taskPriority - a.taskPriority;
-    }
-  });
+  if (priorityAfter) {
+    tasks.sort((a, b) => {
+      return b.taskPriority - a.taskPriority
+    });
+  }
 
   // Populate table rows with sorted tasks
   for (const task of tasks) {
