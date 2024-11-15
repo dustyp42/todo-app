@@ -42,7 +42,7 @@ function refreshTaskTable() {
     return order;
   }, {});
 
-  // Extract tasks and sort them based on the current sortType and pinHighPriority
+  // Extract pending tasks
   let tasks = Object.values(taskData).filter(task => task.taskCompletionTime === 0); // Exclude completed tasks
 
   // Apply sorting
@@ -58,8 +58,7 @@ function refreshTaskTable() {
 
       case 'dueSoonest':
         // Place tasks with no due dates (null) at the end
-        return (a.taskDueTime === null ? 1 : a.taskDueTime) -
-          (b.taskDueTime === null ? 1 : b.taskDueTime);
+        return (a.taskDueTime === null ? (b.taskDueTime == null ? 0 : 1) : (b.taskDueTime == null ? -1 : a.taskDueTime - b.taskDueTime));
 
       case 'byCategory':
         const categoryIndexA = categoryOrder[a.taskCategory] || Infinity;
@@ -72,12 +71,11 @@ function refreshTaskTable() {
   });
 
   // Apply second sort for priority if applicable
-  tasks.sort((a, b) => {
-    // Pin high-priority tasks to the top if pinHighPriority is true
-    if (pinHighPriority && a.taskPriority !== b.taskPriority) {
-      return b.taskPriority - a.taskPriority;
-    }
-  });
+  if (pinHighPriority) {
+    tasks.sort((a, b) => {
+      return b.taskPriority - a.taskPriority
+    });
+  }
 
   // Populate table rows with sorted tasks
   for (const task of tasks) {
